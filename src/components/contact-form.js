@@ -1,19 +1,18 @@
-import React, { Component } from 'react'
+import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 import { Form, Grid, Button } from 'semantic-ui-react'
 import { Field, reduxForm } from 'redux-form'
 import classnames from 'classnames'
-import getProp from 'lodash/get'
 
 const validate = values => {
   const errors = {name: {}}
   const notEmptyMsg = 'Não pode estar branco'
 
-  if (!values.name || !values.name.first)
-    errors.name.first = notEmptyMsg
+  if (!values.firstName)
+    errors.firstName = notEmptyMsg
 
-  if (!values.name || !values.name.last)
-    errors.name.last = notEmptyMsg
+  if (!values.lastName)
+    errors.lastName = notEmptyMsg
 
   if (!values.phone)
     errors.phone = notEmptyMsg
@@ -28,12 +27,11 @@ const validate = values => {
   return errors
 }
 
-class ContactForm extends Component {
+class ContactForm extends PureComponent {
   componentWillReceiveProps(nextProps) {
     const { contact } = nextProps
-    const prop = '_links.self.href'
 
-    if (getProp(contact, prop) !== getProp(this.props.contact, prop))
+    if (contact._id !== this.props.contact._id)
       this.props.initialize(contact)
   }
 
@@ -56,8 +54,8 @@ class ContactForm extends Component {
           <h1>{this.props.contact._links ? 'Edit Contact' : 'Add New Contact'}</h1>
           <Form onSubmit={handleSubmit} loading={loading}>
             <Form.Group widths="equal">
-              <Field id="name_first" name="name.first" type="text" component={this.renderField} label="First name" />
-              <Field id="name_last" name="name.last" type="text" component={this.renderField} label="Last name" />
+              <Field id="name_first" name="firstName" type="text" component={this.renderField} label="First name" />
+              <Field id="name_last" name="lastName" type="text" component={this.renderField} label="Last name" />
             </Form.Group>
             <Field id="phone" name="phone" type="text" component={this.renderField} label="Phone" />
             <Field id="email" name="email" type="text" component={this.renderField} label="Email" />

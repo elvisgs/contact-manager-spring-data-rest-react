@@ -4,13 +4,11 @@ import { Card, Button, Icon } from 'semantic-ui-react'
 import { Link } from 'react-router-dom'
 
 function ContactCard({contact, deleteContact}) {
-  const href = encodeURIComponent(contact._links.self.href)
-
   return (
     <Card>
       <Card.Content>
         <Card.Header>
-          <Icon name="user outline" /> {contact.name.first} {contact.name.last}
+          <Icon name="user outline" /> {contact.firstName} {contact.lastName}
         </Card.Header>
         <Card.Description>
           <p><Icon name='phone'/> {contact.phone}</p>
@@ -19,7 +17,7 @@ function ContactCard({contact, deleteContact}) {
       </Card.Content>
       <Card.Content extra>
         <div className="ui two buttons">
-          <Link to={`/contacts/edit/${href}`} className="ui button basic green">Edit</Link>
+          <Link to={`/contacts/edit/${contact._id}`} className="ui button basic green">Edit</Link>
           <Button basic color="red" onClick={() => deleteContact(contact)}>Delete</Button>
         </div>
       </Card.Content>

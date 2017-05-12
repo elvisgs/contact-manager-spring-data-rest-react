@@ -28,13 +28,13 @@ function ContactList({contacts, errors, loading, deleteContact}) {
 
   const cards = () => contacts.map(contact => (
     <ContactCard
-      key={contact._links.self.href}
+      key={contact._id}
       contact={contact}
       deleteContact={deleteContact}
     />
   ))
 
-  const contactList = <Card.Group>{cards()}</Card.Group>
+  const contactList = <Card.Group itemsPerRow={3}>{cards()}</Card.Group>
 
   return (
     <div>

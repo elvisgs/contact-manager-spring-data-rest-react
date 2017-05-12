@@ -1,4 +1,4 @@
-import React, { Component} from 'react'
+import React, { PureComponent} from 'react'
 import { connect } from 'react-redux'
 import { SubmissionError } from 'redux-form'
 import { Redirect } from 'react-router-dom'
@@ -8,15 +8,15 @@ import {
   fetchContact, updateContact
 } from '../reducers/contact-reducer'
 
-class ContactFormPage extends Component {
+class ContactFormPage extends PureComponent {
   state = {
     redirect: false
   }
 
   componentDidMount() {
-    const { href } = this.props.match.params
-    if (href) {
-      this.props.fetchContact(href)
+    const { id } = this.props.match.params
+    if (id) {
+      this.props.fetchContact(id)
         .catch(err => this.setState({redirect: true}))
     } else {
       this.props.newContact()
@@ -25,7 +25,7 @@ class ContactFormPage extends Component {
 
   async submit(contact) {
     try {
-      if (contact._links)
+      if (contact._id)
         await this.props.updateContact(contact)
       else
         await this.props.saveContact(contact)

@@ -12,7 +12,7 @@ const url = '/contacts'
 
 const initialState = {
   contacts: [],
-  contact: {name: {}},
+  contact: {},
   loading: false,
   errors: {}
 }
@@ -36,38 +36,38 @@ export function saveContact(contact) {
   return (dispatch, getState, client) => {
     return dispatch({
       type: SAVE_CONTACT,
-      payload: client.post(url, contact)
+      payload: client.post(url, denormalizeContact(contact))
     })
   }
 }
 
-export function fetchContact(rel) {
-  rel = decodeURIComponent(rel)
+export function fetchContact(id) {
+  const uri = decodeURIComponent(id)
   return (dispatch, getState, client) => {
     return dispatch({
       type: FETCH_CONTACT,
-      payload: client.request({baseURL: rel})
+      payload: client.request({baseURL: uri})
     })
   }
 }
 
 export function updateContact(contact) {
-  const uri = contact._links.self.href
+  const uri = decodeURIComponent(contact._id)
   return (dispatch, getState, client) => {
     return dispatch({
       type: UPDATE_CONTACT,
-      payload: client.put(uri, contact)
+      payload: client.patch(uri, denormalizeContact(contact))
     })
   }
 }
 
 export function deleteContact(contact) {
-  const uri = contact._links.self.href
+  const uri = decodeURIComponent(contact._id)
   return (dispatch, getState, client) => {
     return dispatch({
       type: DELETE_CONTACT,
       payload: client.delete(uri),
-      meta: { deletedUri: uri }
+      meta: { deletedId: contact._id }
     })
   }
 }
@@ -81,14 +81,14 @@ export default typeToReducer({
     FULFILLED: (state, action) => ({
       ...state,
       loading: false,
-      contacts: action.payload.data._embedded.contacts
+      contacts: action.payload.data._embedded.contacts.map(normalizeContact)
     }),
     REJECTED: handleError
   },
 
   [NEW_CONTACT]: state => ({
     ...state,
-    contact: {name: {}}
+    contact: {}
   }),
 
   [SAVE_CONTACT]: {
@@ -98,7 +98,7 @@ export default typeToReducer({
     }),
     FULFILLED: (state, action) => ({
       ...state,
-      contacts: [...state.contacts, action.payload.data],
+      contacts: [...state.contacts, normalizeContact(action.payload.data)],
       errors: {},
       loading: false
     }),
@@ -109,11 +109,11 @@ export default typeToReducer({
     PENDING: (state) => ({
       ...state,
       loading: true,
-      contact: {name: {}}
+      contact: {}
     }),
     FULFILLED: (state, action) => ({
       ...state,
-      contact: action.payload.data,
+      contact: normalizeContact(action.payload.data),
       loading: false,
       errors: {}
     }),
@@ -126,11 +126,11 @@ export default typeToReducer({
       loading: true
     }),
     FULFILLED: (state, action) => {
-     const contact = action.payload.data
+     const contact = normalizeContact(action.payload.data)
 
      return {
        ...state,
-       contacts: state.contacts.map(item => areEqual(item, contact) ? contact : item),
+       contacts: state.contacts.map(item => item._id === contact._id ? contact : item),
        loading: false,
        errors: {}
      }
@@ -144,16 +144,38 @@ export default typeToReducer({
       loading: true
     }),
     FULFILLED: (state, action) => {
-      const uri = action.meta.deletedUri
+      const id = action.meta.deletedId
+
       return {
         ...state,
-        contacts: state.contacts.filter(item => item._links.self.href !== uri),
+        contacts: state.contacts.filter(item => item._id !== id),
         loading: false
       }
     },
     REJECTED: handleError
   }
 }, initialState)
+
+function normalizeContact({name: {first, last}, email, phone, _links}) {
+  return {
+    _id: encodeURIComponent(_links.self.href),
+    firstName: first,
+    lastName: last,
+    email,
+    phone
+  }
+}
+
+function denormalizeContact({firstName, lastName, email, phone}) {
+  return {
+    name: {
+      first: firstName,
+      last: lastName
+    },
+    email,
+    phone
+  }
+}
 
 function handleError(state, action) {
   const globalError = getProp(action.payload, 'response.data.message') || action.payload.message
@@ -162,16 +184,12 @@ function handleError(state, action) {
     obj[error.field] = error.message
     return obj
   }, {})
-  const { "name.first":first, "name.last":last, phone, email } = fieldErrors;
-  const errors = { global: globalError, name: { first, last }, phone, email }
+  const { "name.first":firstName, "name.last":lastName, phone, email } = fieldErrors;
+  const errors = { global: globalError, firstName, lastName, phone, email }
 
   return {
     ...state,
     errors,
     loading: false
   }
-}
-
-function areEqual(contact1, contact2) {
-  return contact1._links.self.href === contact2._links.self.href
 }

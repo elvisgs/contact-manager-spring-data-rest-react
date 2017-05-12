@@ -1,10 +1,10 @@
-import React, { Component } from 'react'
+import React, { PureComponent } from 'react'
 import { connect } from 'react-redux'
 import ContactList from '../components/contact-list'
 import { Loader, Confirm } from 'semantic-ui-react'
 import { fetchContacts, deleteContact } from '../reducers/contact-reducer'
 
-class ContactListPage extends Component {
+class ContactListPage extends PureComponent {
   state = {
     showConfirm: false,
     contact: null
