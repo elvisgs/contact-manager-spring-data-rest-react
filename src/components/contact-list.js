@@ -16,16 +16,6 @@ function ContactList({contacts, errors, loading, deleteContact}) {
     </Message>
   )
 
-  const errorMessage = (
-    <Message icon error>
-      <Icon name="wait" />
-      <Message.Content>
-        <Message.Header>{errors.global}</Message.Header>
-        Is the backend server running?
-      </Message.Content>
-    </Message>
-  )
-
   const cards = () => contacts.map(contact => (
     <ContactCard
       key={contact._id}
@@ -39,7 +29,6 @@ function ContactList({contacts, errors, loading, deleteContact}) {
   return (
     <div>
       {!contacts.length && !loading && !errors.global && emptyMessage}
-      {errors.global && errorMessage}
       {contacts.length > 0 && contactList}
     </div>
   )

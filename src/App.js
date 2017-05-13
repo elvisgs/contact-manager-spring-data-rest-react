@@ -1,11 +1,24 @@
 import React, { Component } from 'react'
-import { NavLink, Route } from 'react-router-dom'
-import { Container, Icon } from 'semantic-ui-react'
+import { connect } from 'react-redux'
+import { NavLink, Route, withRouter } from 'react-router-dom'
+import { Container, Icon, Message } from 'semantic-ui-react'
 import ContactListPage from './pages/contact-list-page'
 import ContactFormPage from './pages/contact-form-page'
 
 class App extends Component {
   render() {
+    const { errors } = this.props
+
+    const errorMessage = (
+      <Message icon error>
+        <Icon name="wait" />
+        <Message.Content>
+          <Message.Header>{errors.global}</Message.Header>
+          Is the backend server running?
+        </Message.Content>
+      </Message>
+    )
+
     return (
       <Container>
         <div className="ui menu teal inverted">
@@ -19,12 +32,17 @@ class App extends Component {
             Add Contact
           </NavLink>
         </div>
-        <Route exact path="/" component={ContactListPage}/>
-        <Route path="/contacts/new" component={ContactFormPage}/>
-        <Route path="/contacts/edit/:id" component={ContactFormPage}/>
+        {errors.global && errorMessage}
+        <Route exact path="/" component={ContactListPage} />
+        <Route path="/contacts/new" component={ContactFormPage} />
+        <Route path="/contacts/edit/:id" component={ContactFormPage} />
       </Container>
     )
   }
 }
 
-export default App
+const connectedApp = connect(
+  state => ({errors: state.errors})
+)(App)
+
+export default withRouter(connectedApp)
