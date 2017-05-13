@@ -24,7 +24,7 @@ function ContactList({contacts, errors, loading, deleteContact}) {
     />
   ))
 
-  const contactList = <Card.Group itemsPerRow={3}>{cards()}</Card.Group>
+  const contactList = <Card.Group itemsPerRow={4}>{cards()}</Card.Group>
 
   return (
     <div>
