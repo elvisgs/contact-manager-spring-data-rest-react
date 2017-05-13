@@ -81,7 +81,7 @@ const contactListReducer = typeToReducer({
     [...state, normalizeContact(action.payload.data)],
 
   [`${UPDATE_CONTACT}_FULFILLED`]: (state, action) => {
-     const contact = action.payload.data
+     const contact = normalizeContact(action.payload.data)
 
      return state.map(item => item._id === contact._id ? contact : item)
   },
