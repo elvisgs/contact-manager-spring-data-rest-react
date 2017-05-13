@@ -57,7 +57,7 @@ class ContactListPage extends PureComponent {
   }
 }
 
-const mapStateToProps = ({contactStore: {contacts, loading, errors}}) => ({
+const mapStateToProps = ({contactStore: {contacts}, loading, errors}) => ({
   contacts,
   loading,
   errors

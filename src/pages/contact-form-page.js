@@ -50,9 +50,10 @@ class ContactFormPage extends PureComponent {
   }
 }
 
-const mapStateToProps = ({contactStore}) => ({
-  contact: contactStore.contact,
-  errors: contactStore.errors
+const mapStateToProps = ({contactStore: {contact}, loading, errors}) => ({
+  contact,
+  loading,
+  errors
 })
 
 export default connect(

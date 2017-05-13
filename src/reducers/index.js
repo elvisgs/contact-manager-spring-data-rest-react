@@ -1,10 +1,14 @@
 import { combineReducers } from 'redux'
 import { reducer as formReducer } from 'redux-form'
-import ContactReducer from './contact-reducer'
+import contactReducer from './contact-reducer'
+import loadingReducer from './loading-reducer'
+import errorsReducer from './errors-reducer'
 
 const rootReducer = combineReducers({
-  contactStore: ContactReducer,
-  form: formReducer
+  contactStore: contactReducer,
+  form: formReducer,
+  loading: loadingReducer,
+  errors: errorsReducer
 })
 
 export default rootReducer

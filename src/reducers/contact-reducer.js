@@ -1,5 +1,6 @@
 import typeToReducer from 'type-to-reducer'
-import getProp from 'lodash/get'
+import { combineReducers } from 'redux'
+import { normalizeContact, denormalizeContact } from './contact-utils'
 
 const FETCH_CONTACTS = 'contact-manager/FETCH_CONTACTS'
 const NEW_CONTACT = 'contact-manager/NEW_CONTACT'
@@ -72,124 +73,36 @@ export function deleteContact(contact) {
   }
 }
 
-export default typeToReducer({
-  [FETCH_CONTACTS]: {
-    PENDING: state => ({
-      ...state,
-      loading: true
-    }),
-    FULFILLED: (state, action) => ({
-      ...state,
-      loading: false,
-      contacts: action.payload.data._embedded.contacts.map(normalizeContact)
-    }),
-    REJECTED: handleError
+const contactListReducer = typeToReducer({
+  [`${FETCH_CONTACTS}_FULFILLED`]: (state, action) =>
+    action.payload.data._embedded.contacts.map(normalizeContact),
+
+  [`${SAVE_CONTACT}_FULFILLED`]: (state, action) =>
+    [...state, normalizeContact(action.payload.data)],
+
+  [`${UPDATE_CONTACT}_FULFILLED`]: (state, action) => {
+     const contact = action.payload.data
+
+     return state.map(item => item._id === contact._id ? contact : item)
   },
 
-  [NEW_CONTACT]: state => ({
-    ...state,
-    contact: {}
-  }),
+  [`${DELETE_CONTACT}_FULFILLED`]: (state, action) => {
+    const id = action.meta.deletedId
 
-  [SAVE_CONTACT]: {
-    PENDING: state => ({
-      ...state,
-      loading: true
-    }),
-    FULFILLED: (state, action) => ({
-      ...state,
-      contacts: [...state.contacts, normalizeContact(action.payload.data)],
-      errors: {},
-      loading: false
-    }),
-    REJECTED: handleError
-  },
+    return state.filter(item => item._id !== id)
+  }
+}, initialState.contacts)
+
+const contactReducer = typeToReducer({
+  [NEW_CONTACT]: state => ({}),
 
   [FETCH_CONTACT]: {
-    PENDING: (state) => ({
-      ...state,
-      loading: true,
-      contact: {}
-    }),
-    FULFILLED: (state, action) => ({
-      ...state,
-      contact: normalizeContact(action.payload.data),
-      loading: false,
-      errors: {}
-    }),
-    REJECTED: handleError
-  },
-
-  [UPDATE_CONTACT]: {
-    PENDING: (state) => ({
-      ...state,
-      loading: true
-    }),
-    FULFILLED: (state, action) => {
-     const contact = normalizeContact(action.payload.data)
-
-     return {
-       ...state,
-       contacts: state.contacts.map(item => item._id === contact._id ? contact : item),
-       loading: false,
-       errors: {}
-     }
-    },
-    REJECTED: handleError
-  },
-
-  [DELETE_CONTACT]: {
-    PENDING: (state) => ({
-      ...state,
-      loading: true
-    }),
-    FULFILLED: (state, action) => {
-      const id = action.meta.deletedId
-
-      return {
-        ...state,
-        contacts: state.contacts.filter(item => item._id !== id),
-        loading: false
-      }
-    },
-    REJECTED: handleError
+    PENDING: state => ({}),
+    FULFILLED: (state, action) => normalizeContact(action.payload.data)
   }
-}, initialState)
+}, initialState.contact)
 
-function normalizeContact({name: {first, last}, email, phone, _links}) {
-  return {
-    _id: encodeURIComponent(_links.self.href),
-    firstName: first,
-    lastName: last,
-    email,
-    phone
-  }
-}
-
-function denormalizeContact({firstName, lastName, email, phone}) {
-  return {
-    name: {
-      first: firstName,
-      last: lastName
-    },
-    email,
-    phone
-  }
-}
-
-function handleError(state, action) {
-  const globalError = getProp(action.payload, 'response.data.message') || action.payload.message
-  let fieldErrors = getProp(action.payload, 'response.data.errors') || []
-  fieldErrors = fieldErrors.reduce((obj, error) => {
-    obj[error.field] = error.message
-    return obj
-  }, {})
-  const { "name.first":firstName, "name.last":lastName, phone, email } = fieldErrors;
-  const errors = { global: globalError, firstName, lastName, phone, email }
-
-  return {
-    ...state,
-    errors,
-    loading: false
-  }
-}
+export default combineReducers({
+  contacts: contactListReducer,
+  contact: contactReducer
+})
