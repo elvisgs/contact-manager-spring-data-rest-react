@@ -8,7 +8,7 @@ const rootReducer = combineReducers({
   contactStore: contactReducer,
   form: formReducer,
   loading: loadingReducer,
-  errors: errorsReducer
+  errors: errorsReducer,
 })
 
 export default rootReducer
