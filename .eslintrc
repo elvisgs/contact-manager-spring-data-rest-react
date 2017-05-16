@@ -4,10 +4,11 @@
     "linebreak-style": [2, "windows"],
     "no-use-before-define": [2, "nofunc"],
     "semi": [2, "never"],
-    "no-underscore-dangle": 0,
-    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }]
+    "no-underscore-dangle": 0
   },
-  "globals": {
-    "document": true
+  "env": {
+    "node": true,
+    "browser": true,
+    "jest": true
   }
 }

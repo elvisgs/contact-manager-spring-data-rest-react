@@ -14,8 +14,6 @@ const url = '/contacts'
 const initialState = {
   contacts: [],
   contact: {},
-  loading: false,
-  errors: {},
 }
 
 export function fetchContacts() {

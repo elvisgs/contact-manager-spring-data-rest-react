@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
+import { compose } from 'redux'
 import { NavLink, Route, withRouter } from 'react-router-dom'
 import { Container, Icon, Message } from 'semantic-ui-react'
 import ContactListPage from './pages/contact-list-page'
@@ -41,8 +42,9 @@ class App extends Component {
   }
 }
 
-const connectedApp = connect(
-  state => ({ errors: state.errors })
-)(App)
+const enhance = compose(
+  withRouter,
+  connect(state => ({ errors: state.errors }))
+)
 
-export default withRouter(connectedApp)
+export default enhance(App)
